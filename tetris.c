@@ -33,6 +33,7 @@ void game(Cell grid[20][10])
     Piece piece;
     Color_256 bg = navy_blue;
     int counter = 0;
+    double y;
     bool spawn = 1;
     char in;
     while(1)
@@ -44,6 +45,7 @@ void game(Cell grid[20][10])
         {
             spawnpiece(&piece);
             spawn = 0;
+            y = piece.y;
         }
         in = input();
         if(in == 'q')
@@ -76,19 +78,19 @@ void game(Cell grid[20][10])
                     switch(piece.rotation)
                     {
                         case 0:
-                            if(piece.x > 1 && piece.x < 10)
+                            if(piece.x > 1 && piece.x < 9)
                                 piece.x--;
                             break;
                         case 1:
-                            if(piece.x > 0 && piece.x < 10)
+                            if(piece.x > 0 && piece.x < 9)
                                 piece.x--;
                             break;
                         case 2:
-                            if(piece.x > 0 && piece.x < 10)
+                            if(piece.x > 1 && piece.x < 10)
                                 piece.x--;
                             break;
                         case 3:
-                            if(piece.x > 0 && piece.x < 10)
+                            if(piece.x > 1 && piece.x < 10)
                                 piece.x--;
                             break;
                     }
@@ -189,7 +191,7 @@ void game(Cell grid[20][10])
                     switch(piece.rotation)
                     {
                         case 0:
-                            if(piece.x > 0 && piece.x < 10)
+                            if(piece.x >= 0 && piece.x < 10)
                                 piece.x++;
                             break;
                         case 1:
@@ -197,7 +199,7 @@ void game(Cell grid[20][10])
                                 piece.x++;
                             break;
                         case 2:
-                            if(piece.x > 0 && piece.x < 10)
+                            if(piece.x >= 0 && piece.x < 10)
                                 piece.x++;
                             break;
                         case 3:
@@ -214,11 +216,11 @@ void game(Cell grid[20][10])
                                 piece.x++;
                             break;
                         case 1:
-                            if(piece.x > 0 && piece.x < 10)
+                            if(piece.x >= 0 && piece.x < 8)
                                 piece.x++;
                             break;
                         case 2:
-                            if(piece.x > 0 && piece.x < 10)
+                            if(piece.x > 0 && piece.x < 8)
                                 piece.x++;
                             break;
                         case 3:
@@ -320,18 +322,13 @@ void game(Cell grid[20][10])
             piece.rotation = (piece.rotation + 1) % 4;
         if(in == 's')
         {
-            if(piece.y < 19 && counter % 5 == 0)
-            {
-                piece.y++;
-            }
+            y += 0.2;
         }
         else
         {
-            if(piece.y < 19 && counter % 50 == 0)
-            {
-                piece.y++;
-            }
+            y += 0.03;
         }
+        piece.y = floor(y);
         if(checkcollision(grid, piece, counter))
             spawn = 1;
         counter++;

@@ -221,7 +221,7 @@ typedef enum color_256{
     violet = 177,
     gold_3c = 178,
     light_goldenrod_3 = 179,
-    tan = 180,
+    tan_1 = 180,
     misty_rose_3 = 181,
     thistle_3 = 182,
     plum_2 = 183,

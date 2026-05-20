@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <time.h>
+#include <math.h>
 #include "dyeterm.h"
 
 typedef struct cell{
@@ -16,7 +17,7 @@ typedef struct piece{
 
 void spawnpiece(Piece *piece)
 {
-    int type = rand()%7;
+    int type = rand()%7 /*1*/;
     piece->center.value = '#';
     piece->y = 0;
     piece->x = 5;
@@ -147,7 +148,7 @@ bool findpiece(int i, int j, Piece piece, Color_256 bg)
                     }
                     break;
                 case 1:
-                    if(((piece.x == j && piece.y == i) || (piece.x == j + 1 && piece.y == i) || (piece.x == j - 1 && piece.y == i) || (piece.x == j + 1 && piece.y == i + 1)))
+                    if(((piece.x == j && piece.y == i) || (piece.x == j && piece.y == i + 1) || (piece.x == j && piece.y == i + 2) || (piece.x == j - 1 && piece.y == i + 2)))
                     {
                         if(j != 9)
                         {
@@ -163,7 +164,9 @@ bool findpiece(int i, int j, Piece piece, Color_256 bg)
                     }
                     break;
                 case 2:
-                    if(((piece.x == j && piece.y == i) || (piece.x == j + 1 && piece.y == i) || (piece.x == j - 1 && piece.y == i) || (piece.x == j + 1 && piece.y == i + 1)))
+                    piece.x += 1;
+                    piece.y -= 1;
+                    if(((piece.x == j && piece.y == i) || (piece.x == j && piece.y == i + 1) || (piece.x == j + 1 && piece.y == i + 1) || (piece.x == j + 2 && piece.y == i + 1)))
                     {
                         if(j != 9)
                         {
@@ -179,7 +182,7 @@ bool findpiece(int i, int j, Piece piece, Color_256 bg)
                     }
                     break;
                 case 3:
-                    if(((piece.x == j && piece.y == i) || (piece.x == j + 1 && piece.y == i) || (piece.x == j - 1 && piece.y == i) || (piece.x == j + 1 && piece.y == i + 1)))
+                    if(((piece.x == j && piece.y == i) || (piece.x == j + 1 && piece.y == i) || (piece.x == j && piece.y == i + 1) || (piece.x == j && piece.y == i + 2)))
                     {
                         if(j != 9)
                         {
@@ -735,47 +738,43 @@ bool checkcollision(Cell grid[20][10], Piece piece, int counter)
             {
                 case 0:
                     if(piece.y == 19 || grid[piece.y+1][piece.x].value == '#' || grid[piece.y+1][piece.x-1].value == '#' || grid[piece.y+1][piece.x+1].value == '#')
-                        if(counter % 300 == 0)
-                        {
-                            grid[piece.y][piece.x] = piece.center;
-                            grid[piece.y][piece.x-1] = piece.center;
-                            grid[piece.y][piece.x+1] = piece.center;
-                            grid[piece.y-1][piece.x] = piece.center;
-                            return 1;
-                        }
+                    {
+                        grid[piece.y][piece.x] = piece.center;
+                        grid[piece.y][piece.x-1] = piece.center;
+                        grid[piece.y][piece.x+1] = piece.center;
+                        grid[piece.y-1][piece.x] = piece.center;
+                        return 1;
+                    }
                     break;
                 case 1:
                     if(piece.y == 19 || grid[piece.y+1][piece.x].value == '#' || grid[piece.y-1][piece.x+1].value == '#')
-                        if(counter % 500 == 0)
-                        {
-                            grid[piece.y][piece.x] = piece.center;
-                            grid[piece.y-1][piece.x] = piece.center;
-                            grid[piece.y-1][piece.x+1] = piece.center;
-                            grid[piece.y-2][piece.x] = piece.center;
-                            return 1;
-                        }
+                    {
+                        grid[piece.y][piece.x] = piece.center;
+                        grid[piece.y-1][piece.x] = piece.center;
+                        grid[piece.y-1][piece.x+1] = piece.center;
+                        grid[piece.y-2][piece.x] = piece.center;
+                        return 1;
+                    }
                     break;
                 case 2:
                     if(piece.y == 19 || grid[piece.y+1][piece.x].value == '#' || grid[piece.y][piece.x-1].value == '#' || grid[piece.y][piece.x+1].value == '#')
-                        if(counter % 500 == 0)
-                        {
-                            grid[piece.y][piece.x] = piece.center;
-                            grid[piece.y-1][piece.x-1] = piece.center;
-                            grid[piece.y-1][piece.x+1] = piece.center;
-                            grid[piece.y-1][piece.x] = piece.center;
-                            return 1;
-                        }
+                    {
+                        grid[piece.y][piece.x] = piece.center;
+                        grid[piece.y-1][piece.x-1] = piece.center;
+                        grid[piece.y-1][piece.x+1] = piece.center;
+                        grid[piece.y-1][piece.x] = piece.center;
+                        return 1;
+                    }
                     break;
                 case 3:
                     if(piece.y == 19 || grid[piece.y+1][piece.x].value == '#' || grid[piece.y-1][piece.x-1].value == '#')
-                        if(counter % 500 == 0)
-                        {
-                            grid[piece.y][piece.x] = piece.center;
-                            grid[piece.y-1][piece.x] = piece.center;
-                            grid[piece.y-1][piece.x-1] = piece.center;
-                            grid[piece.y-2][piece.x] = piece.center;
-                            return 1;
-                        }
+                    {
+                        grid[piece.y][piece.x] = piece.center;
+                        grid[piece.y-1][piece.x] = piece.center;
+                        grid[piece.y-1][piece.x-1] = piece.center;
+                        grid[piece.y-2][piece.x] = piece.center;
+                        return 1;
+                    }
                     break;
             }
             break;
