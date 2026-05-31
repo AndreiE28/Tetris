@@ -1,7 +1,10 @@
 #include <stdlib.h>
 #include <time.h>
 #include <math.h>
+#include <stdbool.h>
+#include <string.h>
 #include "dyeterm.h"
+#include "livein.h"
 
 typedef struct cell{
     Color_256 c;
@@ -15,13 +18,58 @@ typedef struct piece{
     int rotation;
 }Piece;
 
-void spawnpiece(Piece *piece)
+char input_handler() 
 {
-    int type = rand()%7 /*1*/;
+    char in = input();
+    if (in == '\033') {
+        char nxt1,nxt2;
+        nxt1 = input();
+        if (nxt1 == '[') {
+            nxt2 = input();
+            switch(nxt2){
+                case 'A':
+                    return 'w';
+                    break;
+                case 'B':
+                    return 's';
+                    break;
+                case 'C':
+                    return 'd';
+                    break;
+                case 'D':
+                    return 'a';
+                    break;
+            }
+             
+        }
+    }
+    return in;
+}
+
+void fill_bag(int bag[7])
+{
+    for(int i = 0; i < 7; i++){
+        bag[i] = rand()%7;
+        for(int j = 0; j < i; j++){
+            while(bag[j] == bag[i]){
+                bag[i] = rand()%7;
+                j = 0;
+            }
+        }
+    }
+}
+
+void spawnpiece(Piece *piece, int bag[7], int *current_piece)
+{
+    if(*current_piece == 7){
+        *current_piece = 0;
+        fill_bag(bag);
+    }
+    int type = bag[*current_piece];
     piece->center.value = '#';
-    piece->y = 0;
-    piece->x = 5;
     piece->rotation = 0;
+    piece->x = 1;
+    piece->y = 2;
     switch(type)
     {
         case 0:
@@ -55,7 +103,7 @@ void spawnpiece(Piece *piece)
     }
 }
 
-bool findpiece(int i, int j, Piece piece, Color_256 bg)
+bool findpiece(Cell grid[25][10], int i, int j, Piece piece, Piece ghost_piece, Color_256 bg)
 {
     switch(piece.type)
     {
@@ -77,6 +125,20 @@ bool findpiece(int i, int j, Piece piece, Color_256 bg)
                         }
                         return 1;
                     }
+                    if(((ghost_piece.x == j && ghost_piece.y == i) || (ghost_piece.x == j && ghost_piece.y == i + 1) || (ghost_piece.x == j && ghost_piece.y == i + 2) || (ghost_piece.x == j && ghost_piece.y == i + 3)))
+                    {
+                        if(j != 9)
+                        {
+                            color_on_bg_256(ghost_piece.center.c, bg);
+                            printf("%c ", ghost_piece.center.value);
+                        }
+                        else
+                        {
+                            color_on_bg_256(ghost_piece.center.c, bg);
+                            printf("%c", ghost_piece.center.value);
+                        }
+                        return 1;
+                    }
                     break;
                 case 1:
                     if(((piece.x == j && piece.y == i) || (piece.x == j + 1 && piece.y == i) || (piece.x == j + 2 && piece.y == i) || (piece.x == j + 3 && piece.y == i)))
@@ -90,6 +152,20 @@ bool findpiece(int i, int j, Piece piece, Color_256 bg)
                         {
                             color_on_bg_256(piece.center.c, bg);
                             printf("%c", piece.center.value);
+                        }
+                        return 1;
+                    }
+                    if(((ghost_piece.x == j && ghost_piece.y == i) || (ghost_piece.x == j + 1 && ghost_piece.y == i) || (ghost_piece.x == j + 2 && ghost_piece.y == i) || (ghost_piece.x == j + 3 && ghost_piece.y == i)))
+                    {
+                        if(j != 9)
+                        {
+                            color_on_bg_256(ghost_piece.center.c, bg);
+                            printf("%c ", ghost_piece.center.value);
+                        }
+                        else
+                        {
+                            color_on_bg_256(ghost_piece.center.c, bg);
+                            printf("%c", ghost_piece.center.value);
                         }
                         return 1;
                     }
@@ -109,6 +185,20 @@ bool findpiece(int i, int j, Piece piece, Color_256 bg)
                         }
                         return 1;
                     }
+                    if(((ghost_piece.x == j && ghost_piece.y == i) || (ghost_piece.x == j && ghost_piece.y == i + 1) || (ghost_piece.x == j && ghost_piece.y == i + 2) || (ghost_piece.x == j && ghost_piece.y == i + 3)))
+                    {
+                        if(j != 9)
+                        {
+                            color_on_bg_256(ghost_piece.center.c, bg);
+                            printf("%c ", ghost_piece.center.value);
+                        }
+                        else
+                        {
+                            color_on_bg_256(ghost_piece.center.c, bg);
+                            printf("%c", ghost_piece.center.value);
+                        }
+                        return 1;
+                    }
                     break;
                 case 3:
                     if(((piece.x == j && piece.y == i) || (piece.x == j + 1 && piece.y == i) || (piece.x == j + 2 && piece.y == i) || (piece.x == j + 3 && piece.y == i)))
@@ -122,6 +212,20 @@ bool findpiece(int i, int j, Piece piece, Color_256 bg)
                         {
                             color_on_bg_256(piece.center.c, bg);
                             printf("%c", piece.center.value);
+                        }
+                        return 1;
+                    }
+                    if(((ghost_piece.x == j && ghost_piece.y == i) || (ghost_piece.x == j + 1 && ghost_piece.y == i) || (ghost_piece.x == j + 2 && ghost_piece.y == i) || (ghost_piece.x == j + 3 && ghost_piece.y == i)))
+                    {
+                        if(j != 9)
+                        {
+                            color_on_bg_256(ghost_piece.center.c, bg);
+                            printf("%c ", ghost_piece.center.value);
+                        }
+                        else
+                        {
+                            color_on_bg_256(ghost_piece.center.c, bg);
+                            printf("%c", ghost_piece.center.value);
                         }
                         return 1;
                     }
@@ -146,6 +250,20 @@ bool findpiece(int i, int j, Piece piece, Color_256 bg)
                         }
                         return 1;
                     }
+                    if(((ghost_piece.x == j && ghost_piece.y == i) || (ghost_piece.x == j + 1 && ghost_piece.y == i) || (ghost_piece.x == j - 1 && ghost_piece.y == i) || (ghost_piece.x == j + 1 && ghost_piece.y == i + 1)))
+                    {
+                        if(j != 9)
+                        {
+                            color_on_bg_256(ghost_piece.center.c, bg);
+                            printf("%c ", ghost_piece.center.value);
+                        }
+                        else
+                        {
+                            color_on_bg_256(ghost_piece.center.c, bg);
+                            printf("%c", ghost_piece.center.value);
+                        }
+                        return 1;
+                    }
                     break;
                 case 1:
                     if(((piece.x == j && piece.y == i) || (piece.x == j && piece.y == i + 1) || (piece.x == j && piece.y == i + 2) || (piece.x == j - 1 && piece.y == i + 2)))
@@ -162,10 +280,22 @@ bool findpiece(int i, int j, Piece piece, Color_256 bg)
                         }
                         return 1;
                     }
+                    if(((ghost_piece.x == j && ghost_piece.y == i) || (ghost_piece.x == j && ghost_piece.y == i + 1) || (ghost_piece.x == j && ghost_piece.y == i + 2) || (ghost_piece.x == j - 1 && ghost_piece.y == i + 2)))
+                    {
+                        if(j != 9)
+                        {
+                            color_on_bg_256(ghost_piece.center.c, bg);
+                            printf("%c ", ghost_piece.center.value);
+                        }
+                        else
+                        {
+                            color_on_bg_256(ghost_piece.center.c, bg);
+                            printf("%c", ghost_piece.center.value);
+                        }
+                        return 1;
+                    }
                     break;
                 case 2:
-                    piece.x += 1;
-                    piece.y -= 1;
                     if(((piece.x == j && piece.y == i) || (piece.x == j && piece.y == i + 1) || (piece.x == j + 1 && piece.y == i + 1) || (piece.x == j + 2 && piece.y == i + 1)))
                     {
                         if(j != 9)
@@ -177,6 +307,20 @@ bool findpiece(int i, int j, Piece piece, Color_256 bg)
                         {
                             color_on_bg_256(piece.center.c, bg);
                             printf("%c", piece.center.value);
+                        }
+                        return 1;
+                    }
+                    if(((ghost_piece.x == j && ghost_piece.y == i) || (ghost_piece.x == j && ghost_piece.y == i + 1) || (ghost_piece.x == j + 1 && ghost_piece.y == i + 1) || (ghost_piece.x == j + 2 && ghost_piece.y == i + 1)))
+                    {
+                        if(j != 9)
+                        {
+                            color_on_bg_256(ghost_piece.center.c, bg);
+                            printf("%c ", ghost_piece.center.value);
+                        }
+                        else
+                        {
+                            color_on_bg_256(ghost_piece.center.c, bg);
+                            printf("%c", ghost_piece.center.value);
                         }
                         return 1;
                     }
@@ -193,6 +337,20 @@ bool findpiece(int i, int j, Piece piece, Color_256 bg)
                         {
                             color_on_bg_256(piece.center.c, bg);
                             printf("%c", piece.center.value);
+                        }
+                        return 1;
+                    }
+                    if(((ghost_piece.x == j && ghost_piece.y == i) || (ghost_piece.x == j + 1 && ghost_piece.y == i) || (ghost_piece.x == j && ghost_piece.y == i + 1) || (ghost_piece.x == j && ghost_piece.y == i + 2)))
+                    {
+                        if(j != 9)
+                        {
+                            color_on_bg_256(ghost_piece.center.c, bg);
+                            printf("%c ", ghost_piece.center.value);
+                        }
+                        else
+                        {
+                            color_on_bg_256(ghost_piece.center.c, bg);
+                            printf("%c", ghost_piece.center.value);
                         }
                         return 1;
                     }
@@ -217,9 +375,23 @@ bool findpiece(int i, int j, Piece piece, Color_256 bg)
                         }
                         return 1;
                     }
+                    if(((ghost_piece.x == j && ghost_piece.y == i) || (ghost_piece.x == j + 1 && ghost_piece.y == i) || (ghost_piece.x == j - 1 && ghost_piece.y == i) || (ghost_piece.x == j - 1 && ghost_piece.y == i + 1)))
+                    {
+                        if(j != 9)
+                        {
+                            color_on_bg_256(ghost_piece.center.c, bg);
+                            printf("%c ", ghost_piece.center.value);
+                        }
+                        else
+                        {
+                            color_on_bg_256(ghost_piece.center.c, bg);
+                            printf("%c", ghost_piece.center.value);
+                        }
+                        return 1;
+                    }
                     break;
                 case 1:
-                    if(((piece.x == j && piece.y == i) || (piece.x == j + 1 && piece.y == i) || (piece.x == j - 1 && piece.y == i) || (piece.x == j - 1 && piece.y == i + 1)))
+                    if(((piece.x == j && piece.y == i) || (piece.x == j - 1 && piece.y == i) || (piece.x == j && piece.y == i + 1) || (piece.x == j && piece.y == i + 2)))
                     {
                         if(j != 9)
                         {
@@ -230,12 +402,26 @@ bool findpiece(int i, int j, Piece piece, Color_256 bg)
                         {
                             color_on_bg_256(piece.center.c, bg);
                             printf("%c", piece.center.value);
+                        }
+                        return 1;
+                    }
+                    if(((ghost_piece.x == j && ghost_piece.y == i) || (ghost_piece.x == j - 1 && ghost_piece.y == i) || (ghost_piece.x == j && ghost_piece.y == i + 1) || (ghost_piece.x == j && ghost_piece.y == i + 2)))
+                    {
+                        if(j != 9)
+                        {
+                            color_on_bg_256(ghost_piece.center.c, bg);
+                            printf("%c ", ghost_piece.center.value);
+                        }
+                        else
+                        {
+                            color_on_bg_256(ghost_piece.center.c, bg);
+                            printf("%c", ghost_piece.center.value);
                         }
                         return 1;
                     }
                     break;
                 case 2:
-                    if(((piece.x == j && piece.y == i) || (piece.x == j + 1 && piece.y == i) || (piece.x == j - 1 && piece.y == i) || (piece.x == j - 1 && piece.y == i + 1)))
+                    if(((piece.x == j && piece.y == i) || (piece.x == j && piece.y == i + 1) || (piece.x == j - 1 && piece.y == i + 1) || (piece.x == j - 2 && piece.y == i + 1)))
                     {
                         if(j != 9)
                         {
@@ -249,9 +435,23 @@ bool findpiece(int i, int j, Piece piece, Color_256 bg)
                         }
                         return 1;
                     }
+                    if(((ghost_piece.x == j && ghost_piece.y == i) || (ghost_piece.x == j && ghost_piece.y == i + 1) || (ghost_piece.x == j - 1 && ghost_piece.y == i + 1) || (ghost_piece.x == j - 2 && ghost_piece.y == i + 1)))
+                    {
+                        if(j != 9)
+                        {
+                            color_on_bg_256(ghost_piece.center.c, bg);
+                            printf("%c ", ghost_piece.center.value);
+                        }
+                        else
+                        {
+                            color_on_bg_256(ghost_piece.center.c, bg);
+                            printf("%c", ghost_piece.center.value);
+                        }
+                        return 1;
+                    }
                     break;
                 case 3:
-                    if(((piece.x == j && piece.y == i) || (piece.x == j + 1 && piece.y == i) || (piece.x == j - 1 && piece.y == i) || (piece.x == j - 1 && piece.y == i + 1)))
+                    if(((piece.x == j && piece.y == i) || (piece.x == j && piece.y == i - 1) || (piece.x == j && piece.y == i - 2) || (piece.x == j + 1 && piece.y == i)))
                     {
                         if(j != 9)
                         {
@@ -262,6 +462,20 @@ bool findpiece(int i, int j, Piece piece, Color_256 bg)
                         {
                             color_on_bg_256(piece.center.c, bg);
                             printf("%c", piece.center.value);
+                        }
+                        return 1;
+                    }
+                    if(((ghost_piece.x == j && ghost_piece.y == i) || (ghost_piece.x == j && ghost_piece.y == i + 1) || (ghost_piece.x == j && ghost_piece.y == i + 2) || (ghost_piece.x == j + 1 && ghost_piece.y == i + 2)))
+                    {
+                        if(j != 9)
+                        {
+                            color_on_bg_256(ghost_piece.center.c, bg);
+                            printf("%c ", ghost_piece.center.value);
+                        }
+                        else
+                        {
+                            color_on_bg_256(ghost_piece.center.c, bg);
+                            printf("%c", ghost_piece.center.value);
                         }
                         return 1;
                     }
@@ -269,7 +483,7 @@ bool findpiece(int i, int j, Piece piece, Color_256 bg)
             }
             break;
         case 'O':
-            if(((piece.x == j && piece.y == i) || (piece.x == j - 1 && piece.y == i) || (piece.x == j - 1 && piece.y == i + 1) || (piece.x == j && piece.y == i + 1)))
+            if((piece.x == j && piece.y == i) || (piece.x == j - 1 && piece.y == i) || ((piece.x == j - 1 && piece.y == i + 1) || (piece.x == j && piece.y == i + 1)))
             {
                 if(j != 9)
                 {
@@ -281,7 +495,19 @@ bool findpiece(int i, int j, Piece piece, Color_256 bg)
                     color_on_bg_256(piece.center.c, bg);
                     printf("%c", piece.center.value);
                 }
-                
+                return 1;
+            }
+            if(((ghost_piece.x == j && ghost_piece.y == i) || (ghost_piece.x == j - 1 && ghost_piece.y == i) || (ghost_piece.x == j - 1 && ghost_piece.y == i + 1) || (ghost_piece.x == j && ghost_piece.y == i + 1))){
+                if(j != 9)
+                {
+                    color_on_bg_256(ghost_piece.center.c, bg);
+                    printf("%c ", ghost_piece.center.value);
+                }
+                else
+                {
+                    color_on_bg_256(ghost_piece.center.c, bg);
+                    printf("%c", ghost_piece.center.value);
+                }
                 return 1;
             }
             break;
@@ -303,9 +529,23 @@ bool findpiece(int i, int j, Piece piece, Color_256 bg)
                         }
                         return 1;
                     }
+                    if(((ghost_piece.x == j && ghost_piece.y == i) || (ghost_piece.x == j + 1 && ghost_piece.y == i) || (ghost_piece.x == j - 1 && ghost_piece.y == i + 1) || (ghost_piece.x == j && ghost_piece.y == i + 1)))
+                    {
+                        if(j != 9)
+                        {
+                            color_on_bg_256(ghost_piece.center.c, bg);
+                            printf("%c ", ghost_piece.center.value);
+                        }
+                        else
+                        {
+                            color_on_bg_256(ghost_piece.center.c, bg);
+                            printf("%c", ghost_piece.center.value);
+                        }
+                        return 1;
+                    }
                     break;
                 case 1:
-                    if(((piece.x == j && piece.y == i) || (piece.x == j + 1 && piece.y == i) || (piece.x == j - 1 && piece.y == i + 1) || (piece.x == j && piece.y == i + 1)))
+                    if(((piece.x == j && piece.y == i) || (piece.x == j && piece.y == i + 1) || (piece.x == j + 1 && piece.y == i + 1) || (piece.x == j + 1 && piece.y == i + 2)))
                     {
                         if(j != 9)
                         {
@@ -316,6 +556,20 @@ bool findpiece(int i, int j, Piece piece, Color_256 bg)
                         {
                             color_on_bg_256(piece.center.c, bg);
                             printf("%c", piece.center.value);
+                        }
+                        return 1;
+                    }
+                    if(((ghost_piece.x == j && ghost_piece.y == i) || (ghost_piece.x == j && ghost_piece.y == i + 1) || (ghost_piece.x == j + 1 && ghost_piece.y == i + 1) || (ghost_piece.x == j + 1 && ghost_piece.y == i + 2)))
+                    {
+                        if(j != 9)
+                        {
+                            color_on_bg_256(ghost_piece.center.c, bg);
+                            printf("%c ", ghost_piece.center.value);
+                        }
+                        else
+                        {
+                            color_on_bg_256(ghost_piece.center.c, bg);
+                            printf("%c", ghost_piece.center.value);
                         }
                         return 1;
                     }
@@ -335,9 +589,23 @@ bool findpiece(int i, int j, Piece piece, Color_256 bg)
                         }
                         return 1;
                     }
+                    if(((ghost_piece.x == j && ghost_piece.y == i) || (ghost_piece.x == j + 1 && ghost_piece.y == i) || (ghost_piece.x == j - 1 && ghost_piece.y == i + 1) || (ghost_piece.x == j && ghost_piece.y == i + 1)))
+                    {
+                        if(j != 9)
+                        {
+                            color_on_bg_256(ghost_piece.center.c, bg);
+                            printf("%c ", ghost_piece.center.value);
+                        }
+                        else
+                        {
+                            color_on_bg_256(ghost_piece.center.c, bg);
+                            printf("%c", ghost_piece.center.value);
+                        }
+                        return 1;
+                    }
                     break;
                 case 3:
-                    if(((piece.x == j && piece.y == i) || (piece.x == j + 1 && piece.y == i) || (piece.x == j - 1 && piece.y == i + 1) || (piece.x == j && piece.y == i + 1)))
+                    if(((piece.x == j && piece.y == i) || (piece.x == j && piece.y == i + 1) || (piece.x == j + 1 && piece.y == i + 1) || (piece.x == j + 1 && piece.y == i + 2)))
                     {
                         if(j != 9)
                         {
@@ -348,6 +616,20 @@ bool findpiece(int i, int j, Piece piece, Color_256 bg)
                         {
                             color_on_bg_256(piece.center.c, bg);
                             printf("%c", piece.center.value);
+                        }
+                        return 1;
+                    }
+                    if(((ghost_piece.x == j && ghost_piece.y == i) || (ghost_piece.x == j && ghost_piece.y == i + 1) || (ghost_piece.x == j + 1 && ghost_piece.y == i + 1) || (ghost_piece.x == j + 1 && ghost_piece.y == i + 2)))
+                    {
+                        if(j != 9)
+                        {
+                            color_on_bg_256(ghost_piece.center.c, bg);
+                            printf("%c ", ghost_piece.center.value);
+                        }
+                        else
+                        {
+                            color_on_bg_256(ghost_piece.center.c, bg);
+                            printf("%c", ghost_piece.center.value);
                         }
                         return 1;
                     }
@@ -372,6 +654,20 @@ bool findpiece(int i, int j, Piece piece, Color_256 bg)
                         }
                         return 1;
                     }
+                    if(((ghost_piece.x == j && ghost_piece.y == i) || (ghost_piece.x == j + 1 && ghost_piece.y == i) || (ghost_piece.x == j - 1 && ghost_piece.y == i) || (ghost_piece.x == j && ghost_piece.y == i + 1)))
+                    {
+                        if(j != 9)
+                        {
+                            color_on_bg_256(ghost_piece.center.c, bg);
+                            printf("%c ", ghost_piece.center.value);
+                        }
+                        else
+                        {
+                            color_on_bg_256(ghost_piece.center.c, bg);
+                            printf("%c", ghost_piece.center.value);
+                        }
+                        return 1;
+                    }
                     break;
                 case 1:
                     if(((piece.x == j && piece.y == i) || (piece.x == j && piece.y == i + 1) || (piece.x == j - 1 && piece.y == i + 1) || (piece.x == j && piece.y == i + 2)))
@@ -385,6 +681,20 @@ bool findpiece(int i, int j, Piece piece, Color_256 bg)
                         {
                             color_on_bg_256(piece.center.c, bg);
                             printf("%c", piece.center.value);
+                        }
+                        return 1;
+                    }
+                    if(((ghost_piece.x == j && ghost_piece.y == i) || (ghost_piece.x == j && ghost_piece.y == i + 1) || (ghost_piece.x == j - 1 && ghost_piece.y == i + 1) || (ghost_piece.x == j && ghost_piece.y == i + 2)))
+                    {
+                        if(j != 9)
+                        {
+                            color_on_bg_256(ghost_piece.center.c, bg);
+                            printf("%c ", ghost_piece.center.value);
+                        }
+                        else
+                        {
+                            color_on_bg_256(ghost_piece.center.c, bg);
+                            printf("%c", ghost_piece.center.value);
                         }
                         return 1;
                     }
@@ -404,6 +714,20 @@ bool findpiece(int i, int j, Piece piece, Color_256 bg)
                         }
                         return 1;
                     }
+                    if(((ghost_piece.x == j && ghost_piece.y == i) || (ghost_piece.x == j + 1 && ghost_piece.y == i + 1) || (ghost_piece.x == j - 1 && ghost_piece.y == i + 1) || (ghost_piece.x == j && ghost_piece.y == i + 1)))
+                    {
+                        if(j != 9)
+                        {
+                            color_on_bg_256(ghost_piece.center.c, bg);
+                            printf("%c ", ghost_piece.center.value);
+                        }
+                        else
+                        {
+                            color_on_bg_256(ghost_piece.center.c, bg);
+                            printf("%c", ghost_piece.center.value);
+                        }
+                        return 1;
+                    }
                     break;
                 case 3:
                     if(((piece.x == j && piece.y == i) || (piece.x == j && piece.y == i + 1) || (piece.x == j + 1 && piece.y == i + 1) || (piece.x == j && piece.y == i + 2)))
@@ -420,6 +744,20 @@ bool findpiece(int i, int j, Piece piece, Color_256 bg)
                         }
                         return 1;
                     }
+                    if(((ghost_piece.x == j && ghost_piece.y == i) || (ghost_piece.x == j && ghost_piece.y == i + 1) || (ghost_piece.x == j + 1 && ghost_piece.y == i + 1) || (ghost_piece.x == j && ghost_piece.y == i + 2)))
+                    {
+                        if(j != 9)
+                        {
+                            color_on_bg_256(ghost_piece.center.c, bg);
+                            printf("%c ", ghost_piece.center.value);
+                        }
+                        else
+                        {
+                            color_on_bg_256(ghost_piece.center.c, bg);
+                            printf("%c", ghost_piece.center.value);
+                        }
+                        return 1;
+                    }
                     break;
             }
             break;
@@ -441,9 +779,23 @@ bool findpiece(int i, int j, Piece piece, Color_256 bg)
                         }
                         return 1;
                     }
+                    if(((ghost_piece.x == j && ghost_piece.y == i) || (ghost_piece.x == j + 1 && ghost_piece.y == i + 1) || (ghost_piece.x == j - 1 && ghost_piece.y == i) || (ghost_piece.x == j && ghost_piece.y == i + 1)))
+                    {
+                        if(j != 9)
+                        {
+                            color_on_bg_256(ghost_piece.center.c, bg);
+                            printf("%c ", ghost_piece.center.value);
+                        }
+                        else
+                        {
+                            color_on_bg_256(ghost_piece.center.c, bg);
+                            printf("%c", ghost_piece.center.value);
+                        }
+                        return 1;
+                    }
                     break;
                 case 1:
-                    if(((piece.x == j && piece.y == i) || (piece.x == j + 1 && piece.y == i + 1) || (piece.x == j - 1 && piece.y == i) || (piece.x == j && piece.y == i + 1)) )
+                    if(((piece.x == j && piece.y == i) || (piece.x == j && piece.y == i + 1) || (piece.x == j - 1 && piece.y == i + 1) || (piece.x == j - 1 && piece.y == i + 2)))
                     {
                         if(j != 9)
                         {
@@ -454,6 +806,20 @@ bool findpiece(int i, int j, Piece piece, Color_256 bg)
                         {
                             color_on_bg_256(piece.center.c, bg);
                             printf("%c", piece.center.value);
+                        }
+                        return 1;
+                    }
+                    if(((ghost_piece.x == j && ghost_piece.y == i) || (ghost_piece.x == j && ghost_piece.y == i + 1) || (ghost_piece.x == j - 1 && ghost_piece.y == i + 1) || (ghost_piece.x == j - 1 && ghost_piece.y == i + 2)))
+                    {
+                        if(j != 9)
+                        {
+                            color_on_bg_256(ghost_piece.center.c, bg);
+                            printf("%c ", ghost_piece.center.value);
+                        }
+                        else
+                        {
+                            color_on_bg_256(ghost_piece.center.c, bg);
+                            printf("%c", ghost_piece.center.value);
                         }
                         return 1;
                     }
@@ -473,9 +839,23 @@ bool findpiece(int i, int j, Piece piece, Color_256 bg)
                         }
                         return 1;
                     }
+                    if(((ghost_piece.x == j && ghost_piece.y == i) || (ghost_piece.x == j + 1 && ghost_piece.y == i + 1) || (ghost_piece.x == j - 1 && ghost_piece.y == i) || (ghost_piece.x == j && ghost_piece.y == i + 1)))
+                    {
+                        if(j != 9)
+                        {
+                            color_on_bg_256(ghost_piece.center.c, bg);
+                            printf("%c ", ghost_piece.center.value);
+                        }
+                        else
+                        {
+                            color_on_bg_256(ghost_piece.center.c, bg);
+                            printf("%c", ghost_piece.center.value);
+                        }
+                        return 1;
+                    }
                     break;
                 case 3:
-                    if(((piece.x == j && piece.y == i) || (piece.x == j + 1 && piece.y == i + 1) || (piece.x == j - 1 && piece.y == i) || (piece.x == j && piece.y == i + 1)) )
+                    if(((piece.x == j && piece.y == i) || (piece.x == j && piece.y == i + 1) || (piece.x == j - 1 && piece.y == i + 1) || (piece.x == j - 1 && piece.y == i + 2)))
                     {
                         if(j != 9)
                         {
@@ -489,6 +869,20 @@ bool findpiece(int i, int j, Piece piece, Color_256 bg)
                         }
                         return 1;
                     }
+                    if(((ghost_piece.x == j && ghost_piece.y == i) || (ghost_piece.x == j && ghost_piece.y == i + 1) || (ghost_piece.x == j - 1 && ghost_piece.y == i + 1) || (ghost_piece.x == j - 1 && ghost_piece.y == i + 2)))
+                    {
+                        if(j != 9)
+                        {
+                            color_on_bg_256(ghost_piece.center.c, bg);
+                            printf("%c ", ghost_piece.center.value);
+                        }
+                        else
+                        {
+                            color_on_bg_256(ghost_piece.center.c, bg);
+                            printf("%c", ghost_piece.center.value);
+                        }
+                        return 1;
+                    }
                     break;
             }
             break;
@@ -496,20 +890,81 @@ bool findpiece(int i, int j, Piece piece, Color_256 bg)
     return 0;
 }
 
-void printgrid(Cell grid[20][10], Piece piece, Color_256 bg, int offset)
+bool findnxtpiece(Cell grid[4][3], int i, int j, Piece piece, Color_256 bg)
 {
-    bool ok = 1;
+    switch(piece.type)
+    {
+        case 'I':
+                if(piece.x == j && (piece.y == i || piece.y == i + 1 || piece.y == i + 2 || piece.y == i - 1))
+                {
+                    color_on_bg_256(piece.center.c, bg);
+                    printf("%c ", piece.center.value);
+                    return 1;
+                }
+               break;
+        case 'J':
+                if(((piece.x == j && piece.y == i) || (piece.x == j + 1 && piece.y == i) || (piece.x == j - 1 && piece.y == i) || (piece.x == j + 1 && piece.y == i + 1))){
+                    color_on_bg_256(piece.center.c, bg);
+                    printf("%c ", piece.center.value);
+                    return 1;
+                }
+                break;
+        case 'L':
+                if(((piece.x == j && piece.y == i) || (piece.x == j + 1 && piece.y == i) || (piece.x == j - 1 && piece.y == i) || (piece.x == j - 1 && piece.y == i + 1))){
+                    color_on_bg_256(piece.center.c, bg);
+                    printf("%c ", piece.center.value);
+                    return 1;
+                }
+                break;
+        case 'O':
+            if((piece.x == j && piece.y == i) || (piece.x == j - 1 && piece.y == i) || ((piece.x == j - 1 && piece.y == i + 1) || (piece.x == j && piece.y == i + 1))){
+                color_on_bg_256(piece.center.c, bg);
+                printf("%c ", piece.center.value);
+                return 1;
+            }
+            break;
+        case 'S':
+                if(((piece.x == j && piece.y == i) || (piece.x == j + 1 && piece.y == i) || (piece.x == j - 1 && piece.y == i + 1) || (piece.x == j && piece.y == i + 1))){
+                    color_on_bg_256(piece.center.c, bg);
+                    printf("%c ", piece.center.value);
+                    return 1;
+                }
+                break;
+        case 'T':
+                if(((piece.x == j && piece.y == i) || (piece.x == j + 1 && piece.y == i) || (piece.x == j - 1 && piece.y == i) || (piece.x == j && piece.y == i + 1))){
+                    color_on_bg_256(piece.center.c, bg);
+                    printf("%c ", piece.center.value);
+                    return 1;
+                }
+                break;
+        case 'Z':
+                if(((piece.x == j && piece.y == i) || (piece.x == j + 1 && piece.y == i + 1) || (piece.x == j - 1 && piece.y == i) || (piece.x == j && piece.y == i + 1)) ){
+                    color_on_bg_256(piece.center.c, bg);
+                    printf("%c ", piece.center.value);
+                    return 1;
+                }
+                break;
+    }
+    return 0;
+}
+
+void printgrid(Cell grid[25][10], Piece piece, Piece ghost_piece, Piece next_piece, int score, int level, Color_256 bg, int offset)
+{
+    bool ok = 1, nxt = 1;
+    Cell nxt_box[4][3];
     for(int k = 0; k <= 4; k++)
     {
         printf("\n");
     }
-    for(int i = 0; i < 20; i++)
+    printf("\t\t\t\t\t\tSCORE: %d   LEVEL: %d\n", score, level);
+    for(int i = 5; i < 25; i++)
     {
-        for(int k = 0; k < offset; k++)
-            printf("\t");
+        for(int k = 0; k < offset; k++){
+                printf("\t");
+            }
         for(int j = 0; j < 10; j++)
         {
-            ok = !findpiece(i, j, piece, bg);
+            ok = !findpiece(grid, i, j, piece, ghost_piece, bg);
             if(ok)
             {
                 if(j != 9)
@@ -524,14 +979,36 @@ void printgrid(Cell grid[20][10], Piece piece, Color_256 bg, int offset)
                 }
             }
         }
+        if(i == 7){
+            setcolor(reset);
+            printf("\t\t\tNEXT PIECE:");
+        }
+        if(i >= 8 && i < 12){
+            setcolor(reset);
+            printf("\t\t\t  ");
+            for(int l = 0; l < 3; l++){
+                nxt = !findnxtpiece(nxt_box, i-8, l, next_piece, bg);
+                if(nxt){
+                    if(l != 3){
+                        color_on_bg_256(white_256, bg);
+                        printf("0 ");
+                    }
+                    else{
+                        color_on_bg_256(white_256, bg);
+                        printf("0");
+                    }
+                    
+                }
+            }
+        }
         setcolor(reset);
         printf("\n");
     }
 }
 
-void emptygrid(Cell grid[20][10])
+void emptygrid(Cell grid[25][10])
 {
-    for(int i = 0; i < 20; i++)
+    for(int i = 0; i < 25; i++)
         for(int j = 0; j < 10; j++)
         {
             grid[i][j].value = '0';
@@ -539,196 +1016,518 @@ void emptygrid(Cell grid[20][10])
         }
 }
 
-bool checkcollision(Cell grid[20][10], Piece piece, int counter)
+bool checkcollision(Cell grid[25][10], Piece piece, double *velocity, bool hard_drop, int level, char state[5])
 {
-    switch(piece.type)
-    {
+    static int cooldown = 200, counter = 0;
+    switch(piece.type){
         case 'I':
-            switch(piece.rotation)
-            {
+            switch(piece.rotation){
                 case 0:
-                    if(piece.y == 19 || grid[piece.y+1][piece.x].value == '#')
-                    {
-                        grid[piece.y][piece.x] = piece.center;
-                        grid[piece.y-1][piece.x] = piece.center;
-                        grid[piece.y-2][piece.x] = piece.center;
-                        grid[piece.y-3][piece.x] = piece.center;
-                        return 1;
+                    if(piece.y == 24 || (piece.y < 24 && grid[piece.y+1][piece.x].value == '#')){
+                        if(piece.center.c != grey_50){
+                            counter++;
+                            *velocity = 0;
+                            if(counter == fmin(cooldown - 10*(level-1), 60)  || hard_drop == 1){
+                                if(piece.y <= 7){
+                                strcpy(state, "over");
+                                return 1;
+                                }
+                                grid[piece.y][piece.x] = piece.center;
+                                grid[piece.y-1][piece.x] = piece.center;
+                                grid[piece.y-2][piece.x] = piece.center;
+                                grid[piece.y-3][piece.x] = piece.center;
+                                counter = 0;
+                                return 1;
+                            }
+                        }
+                        else{
+                            if(piece.center.c == grey_50){
+                                return 1;
+                            }
+                            else{
+                                *velocity = 0;
+                                return 0;
+                            }
+                        }
                     }
                     break;
                 case 1:
-                    if(piece.y == 19 || grid[piece.y+1][piece.x].value == '#')
-                    {
-                        grid[piece.y][piece.x] = piece.center;
-                        grid[piece.y][piece.x] = piece.center;
-                        grid[piece.y][piece.x] = piece.center;
-                        grid[piece.y][piece.x] = piece.center;
-                        return 1;
+                    if(piece.y == 24 || (piece.y < 24 && (grid[piece.y+1][piece.x].value == '#' || grid[piece.y+1][piece.x-1].value == '#' || grid[piece.y+1][piece.x-2].value == '#' || grid[piece.y+1][piece.x-3].value == '#'))){
+                        if(piece.center.c != grey_50){
+                            counter++;
+                            *velocity = 0;
+                            if(counter == fmin(cooldown - 10*(level-1), 60)  || hard_drop == 1){
+                                if(piece.y <= 4){
+                                strcpy(state, "over");
+                                return 1;
+                                }
+                                grid[piece.y][piece.x] = piece.center;
+                                grid[piece.y][piece.x-1] = piece.center;
+                                grid[piece.y][piece.x-2] = piece.center;
+                                grid[piece.y][piece.x-3] = piece.center;
+                                counter = 0;
+                                return 1;
+                            }
+                            
+                        }
+                        else{
+                            if(piece.center.c == grey_50){
+                                return 1;
+                            }
+                            else{
+                                *velocity = 0;
+                                return 0;
+                            }
+                        }
                     }
                     break;
                 case 2:
-                    if(piece.y == 19 || grid[piece.y+1][piece.x].value == '#')
-                    {
-                        grid[piece.y][piece.x] = piece.center;
-                        grid[piece.y][piece.x] = piece.center;
-                        grid[piece.y][piece.x] = piece.center;
-                        grid[piece.y][piece.x] = piece.center;
-                        return 1;
+                    if(piece.y == 24 || (piece.y < 24 && grid[piece.y+1][piece.x].value == '#')){
+                        if(piece.center.c != grey_50){
+                            counter++;
+                            *velocity = 0;
+                            if(counter == fmin(cooldown - 10*(level-1), 60)  || hard_drop == 1){
+                                if(piece.y <= 7){
+                                strcpy(state, "over");
+                                return 1;
+                                }
+                                grid[piece.y][piece.x] = piece.center;
+                                grid[piece.y-1][piece.x] = piece.center;
+                                grid[piece.y-2][piece.x] = piece.center;
+                                grid[piece.y-3][piece.x] = piece.center;
+                                counter = 0;
+                                return 1;
+                            }
+                        }
+                        else{
+                            if(piece.center.c == grey_50){
+                                return 1;
+                            }
+                            else{
+                                *velocity = 0;
+                                return 0;
+                            }
+                        }
                     }
                     break;
                 case 3:
-                    if(piece.y == 19 || grid[piece.y+1][piece.x].value == '#')
-                    {
-                        grid[piece.y][piece.x] = piece.center;
-                        grid[piece.y][piece.x] = piece.center;
-                        grid[piece.y][piece.x] = piece.center;
-                        grid[piece.y][piece.x] = piece.center;
-                        return 1;
+                    if(piece.y == 24 || (piece.y < 24 && (grid[piece.y+1][piece.x].value == '#' || grid[piece.y+1][piece.x-1].value == '#' || grid[piece.y+1][piece.x-2].value == '#' || grid[piece.y+1][piece.x-3].value == '#'))){
+                        if(piece.center.c != grey_50){
+                            counter++;
+                            *velocity = 0;
+                            if(counter == fmin(cooldown - 10*(level-1), 60)  || hard_drop == 1){
+                                if(piece.y <= 4){
+                                strcpy(state, "over");
+                                return 1;
+                                }
+                                grid[piece.y][piece.x] = piece.center;
+                                grid[piece.y][piece.x-1] = piece.center;
+                                grid[piece.y][piece.x-2] = piece.center;
+                                grid[piece.y][piece.x-3] = piece.center;
+                                counter = 0;
+                                return 1;
+                            }
+                        }
+                        else{
+                            if(piece.center.c == grey_50){
+                                return 1;
+                            }
+                            else{
+                                *velocity = 0;
+                                return 0;
+                            }
+                        }
                     }
                     break;
             }
             break;
         case 'J':
-            switch(piece.rotation)
-            {
+            switch(piece.rotation){
                 case 0:
-                    if(piece.y == 19 || grid[piece.y+1][piece.x].value == '#' || grid[piece.y+1][piece.x-1].value == '#' || grid[piece.y+1][piece.x+1].value == '#')
-                    {
-                        grid[piece.y][piece.x] = piece.center;
-                        grid[piece.y][piece.x-1] = piece.center;
-                        grid[piece.y][piece.x+1] = piece.center;
-                        grid[piece.y-1][piece.x-1] = piece.center;
-                        return 1;
+                    if(piece.y == 24 || (piece.y < 24 && (grid[piece.y+1][piece.x].value == '#' || grid[piece.y+1][piece.x-1].value == '#' || grid[piece.y+1][piece.x+1].value == '#'))){
+                        if(piece.center.c != grey_50){
+                            counter++;
+                            *velocity = 0;
+                            if(counter == fmin(cooldown - 10*(level-1), 60)  || hard_drop == 1){
+                                if(piece.y <= 5){
+                                strcpy(state, "over");
+                                return 1;
+                                }
+                                grid[piece.y][piece.x] = piece.center;
+                                grid[piece.y][piece.x-1] = piece.center;
+                                grid[piece.y][piece.x+1] = piece.center;
+                                grid[piece.y-1][piece.x-1] = piece.center;
+                                counter = 0;
+                                return 1;
+                            }
+                        }
+                        else{
+                            if(piece.center.c == grey_50){
+                                return 1;
+                            }
+                            else{
+                                *velocity = 0;
+                                return 0;
+                            }
+                        }
                     }
                     break;
                 case 1:
-                    if(piece.y == 19 || grid[piece.y+1][piece.x].value == '#')
-                    {
-                        grid[piece.y][piece.x] = piece.center;
-                        grid[piece.y][piece.x] = piece.center;
-                        grid[piece.y][piece.x] = piece.center;
-                        grid[piece.y][piece.x] = piece.center;
-                        return 1;
+                    if(piece.y == 24 || (piece.y < 24 && (grid[piece.y+1][piece.x].value == '#' || grid[piece.y-1][piece.x+1].value == '#'))){
+                        if(piece.center.c != grey_50){
+                            counter++;
+                            *velocity = 0;
+                            if(counter == fmin(cooldown - 10*(level-1), 60)  || hard_drop == 1){
+                                if(piece.y <= 6){
+                                strcpy(state, "over");
+                                return 1;
+                                }
+                                grid[piece.y][piece.x] = piece.center;
+                                grid[piece.y-1][piece.x] = piece.center;
+                                grid[piece.y-2][piece.x] = piece.center;
+                                grid[piece.y-2][piece.x+1] = piece.center;
+                                counter = 0;
+                                return 1;
+                            }
+                        }
+                        else{
+                            if(piece.center.c == grey_50){
+                                return 1;
+                            }
+                            else{
+                                *velocity = 0;
+                                return 0;
+                            }
+                        }
                     }
                     break;
                 case 2:
-                    if(piece.y == 19 || grid[piece.y+1][piece.x].value == '#')
-                    {
-                        grid[piece.y][piece.x] = piece.center;
-                        grid[piece.y][piece.x] = piece.center;
-                        grid[piece.y][piece.x] = piece.center;
-                        grid[piece.y][piece.x] = piece.center;
-                        return 1;
+                    if(piece.y == 24 || (piece.y < 24 && (grid[piece.y+1][piece.x].value == '#' || grid[piece.y][piece.x-1].value == '#' || grid[piece.y][piece.x-2].value == '#'))){
+                        if(piece.center.c != grey_50){
+                            counter++;
+                            *velocity = 0;
+                            if(counter == fmin(cooldown - 10*(level-1), 60)  || hard_drop == 1){
+                                if(piece.y <= 5){
+                                strcpy(state, "over");
+                                return 1;
+                                }
+                                grid[piece.y][piece.x] = piece.center;
+                                grid[piece.y-1][piece.x] = piece.center;
+                                grid[piece.y-1][piece.x-1] = piece.center;
+                                grid[piece.y-1][piece.x-2] = piece.center;
+                                counter = 0;
+                                return 1;
+                            }
+                        }
+                        else{
+                            if(piece.center.c == grey_50){
+                                return 1;
+                            }
+                            else{
+                                *velocity = 0;
+                                return 0;
+                            }
+                        }
                     }
                     break;
                 case 3:
-                    if(piece.y == 19 || grid[piece.y+1][piece.x].value == '#')
-                    {
-                        grid[piece.y][piece.x] = piece.center;
-                        grid[piece.y][piece.x] = piece.center;
-                        grid[piece.y][piece.x] = piece.center;
-                        grid[piece.y][piece.x] = piece.center;
-                        return 1;
+                    if(piece.y == 24 || (piece.y < 24 && (grid[piece.y+1][piece.x].value == '#' || grid[piece.y+1][piece.x-1].value == '#'))){
+                        if(piece.center.c != grey_50){
+                            counter++;
+                            *velocity = 0;
+                            if(counter == fmin(cooldown - 10*(level-1), 60)  || hard_drop == 1){
+                                if(piece.y <= 6){
+                                strcpy(state, "over");
+                                return 1;
+                                }
+                                grid[piece.y][piece.x] = piece.center;
+                                grid[piece.y][piece.x-1] = piece.center;
+                                grid[piece.y-1][piece.x] = piece.center;
+                                grid[piece.y-2][piece.x] = piece.center;
+                                counter = 0;
+                                return 1;
+                            }
+                        }
+                            
+                        else{
+                            if(piece.center.c == grey_50){
+                                return 1;
+                            }
+                            else{
+                                *velocity = 0;
+                                return 0;
+                            }
+                        }
                     }
                     break;
             }
             break;
         case 'L':
-            switch(piece.rotation)
-            {
+            switch(piece.rotation){
                 case 0:
-                    if(piece.y == 19 || grid[piece.y+1][piece.x].value == '#' || grid[piece.y+1][piece.x-1].value == '#' || grid[piece.y+1][piece.x+1].value == '#')
-                    {
-                        grid[piece.y][piece.x] = piece.center;
-                        grid[piece.y][piece.x-1] = piece.center;
-                        grid[piece.y][piece.x+1] = piece.center;
-                        grid[piece.y-1][piece.x+1] = piece.center;
-                        return 1;
+                    if(piece.y == 24 || (piece.y < 24 && (grid[piece.y+1][piece.x].value == '#' || grid[piece.y+1][piece.x-1].value == '#' || grid[piece.y+1][piece.x+1].value == '#'))){
+                        if(piece.center.c != grey_50){
+                            counter++;
+                            *velocity = 0;
+                            if(counter == fmin(cooldown - 10*(level-1), 60)  || hard_drop == 1){
+                                if(piece.y <= 5){
+                                strcpy(state, "over");
+                                return 1;
+                                }
+                                grid[piece.y][piece.x] = piece.center;
+                                grid[piece.y][piece.x-1] = piece.center;
+                                grid[piece.y][piece.x+1] = piece.center;
+                                grid[piece.y-1][piece.x+1] = piece.center;
+                                counter = 0;
+                                return 1;
+                            }  
+                        }
+                        else{
+                            if(piece.center.c == grey_50){
+                                return 1;
+                            }
+                            else{
+                                *velocity = 0;
+                                return 0;
+                            }
+                        }
                     }
                     break;
                 case 1:
-                    if(piece.y == 19 || grid[piece.y+1][piece.x].value == '#')
-                    {
-                        grid[piece.y][piece.x] = piece.center;
-                        grid[piece.y][piece.x] = piece.center;
-                        grid[piece.y][piece.x] = piece.center;
-                        grid[piece.y][piece.x] = piece.center;
-                        return 1;
+                    if(piece.y == 24 || (piece.y < 24 && (grid[piece.y+1][piece.x].value == '#' || grid[piece.y+1][piece.x+1].value == '#'))){
+                        if(piece.center.c != grey_50){
+                            counter++;
+                            *velocity = 0;
+                            if(counter == fmin(cooldown - 10*(level-1), 60)  || hard_drop == 1){
+                                if(piece.y <= 6){
+                                strcpy(state, "over");
+                                return 1;
+                                }
+                                grid[piece.y][piece.x] = piece.center;
+                                grid[piece.y][piece.x+1] = piece.center;
+                                grid[piece.y-1][piece.x] = piece.center;
+                                grid[piece.y-2][piece.x] = piece.center;
+                                counter = 0;
+                                return 1;
+                            }
+                        }
+                        else{
+                            if(piece.center.c == grey_50){
+                                return 1;
+                            }
+                            else{
+                                *velocity = 0;
+                                return 0;
+                            }
+                        }
                     }
                     break;
                 case 2:
-                    if(piece.y == 19 || grid[piece.y+1][piece.x].value == '#')
-                    {
-                        grid[piece.y][piece.x] = piece.center;
-                        grid[piece.y][piece.x] = piece.center;
-                        grid[piece.y][piece.x] = piece.center;
-                        grid[piece.y][piece.x] = piece.center;
-                        return 1;
+                    if(piece.y == 24 || (piece.y < 24 && (grid[piece.y+1][piece.x].value == '#' || grid[piece.y][piece.x+1].value == '#' || grid[piece.y][piece.x+2].value == '#'))){
+                        if(piece.center.c != grey_50){
+                            counter++;
+                            *velocity = 0;
+                            if(counter == fmin(cooldown - 10*(level-1), 60)  || hard_drop == 1){
+                                if(piece.y <= 5){
+                                strcpy(state, "over");
+                                return 1;
+                            }
+                            grid[piece.y][piece.x] = piece.center;
+                            grid[piece.y-1][piece.x] = piece.center;
+                            grid[piece.y-1][piece.x+1] = piece.center;
+                            grid[piece.y-1][piece.x+2] = piece.center;
+                            counter = 0;
+                            return 1;
+                            }
+                        }
+                        else{
+                            if(piece.center.c == grey_50){
+                                return 1;
+                            }
+                            else{
+                                *velocity = 0;
+                                return 0;
+                            }
+                        }
                     }
                     break;
                 case 3:
-                    if(piece.y == 19 || grid[piece.y+1][piece.x].value == '#')
-                    {
-                        grid[piece.y][piece.x] = piece.center;
-                        grid[piece.y][piece.x] = piece.center;
-                        grid[piece.y][piece.x] = piece.center;
-                        grid[piece.y][piece.x] = piece.center;
-                        return 1;
+                    if(piece.y == 24 || (piece.y < 24 && (grid[piece.y+1][piece.x].value == '#' || grid[piece.y-1][piece.x-1].value == '#'))){
+                        if(piece.center.c != grey_50){
+                            counter++;
+                            *velocity = 0;
+                            if(counter == fmin(cooldown - 10*(level-1), 60)  || hard_drop == 1){
+                                if(piece.y <= 6){
+                                strcpy(state, "over");
+                                return 1;
+                                }
+                                grid[piece.y][piece.x] = piece.center;
+                                grid[piece.y-2][piece.x-1] = piece.center;
+                                grid[piece.y-1][piece.x] = piece.center;
+                                grid[piece.y-2][piece.x] = piece.center;
+                                counter = 0;
+                                return 1;
+                            }
+                        }
+                        else{
+                            if(piece.center.c == grey_50){
+                                return 1;
+                            }
+                            else{
+                                *velocity = 0;
+                                return 0;
+                            }
+                        }
                     }
                     break;
             }
             break;
         case 'O':
-            if(piece.y == 19 || grid[piece.y+1][piece.x].value == '#' || grid[piece.y+1][piece.x+1].value == '#')
-            {
-                grid[piece.y][piece.x] = piece.center;
-                grid[piece.y][piece.x+1] = piece.center;
-                grid[piece.y-1][piece.x+1] = piece.center;
-                grid[piece.y-1][piece.x] = piece.center;
-                return 1;
+            if(piece.y == 24 || (piece.y < 24 && (grid[piece.y+1][piece.x].value == '#' || grid[piece.y+1][piece.x+1].value == '#'))){
+                if(piece.center.c != grey_50){
+                    counter++;
+                    *velocity = 0;
+                    if(counter == fmin(cooldown - 10*(level-1), 60)  || hard_drop == 1){
+                        if(piece.y <= 5){
+                        strcpy(state, "over");
+                        return 1;
+                    }
+                    grid[piece.y][piece.x] = piece.center;
+                    grid[piece.y][piece.x+1] = piece.center;
+                    grid[piece.y-1][piece.x+1] = piece.center;
+                    grid[piece.y-1][piece.x] = piece.center;
+                    counter = 0;
+                    return 1;
+                    }
+                }
+                else{
+                    if(piece.center.c == grey_50){
+                        return 1;
+                    }
+                    else{
+                        *velocity = 0;
+                        return 0;
+                    }
+                }
+                
             }
             break;
         case 'S':
-            switch(piece.rotation)
-            {
+            switch(piece.rotation){
                 case 0:
-                    if(piece.y == 19 || grid[piece.y+1][piece.x].value == '#' || grid[piece.y+1][piece.x-1].value == '#' || grid[piece.y][piece.x+1].value == '#')
-                    {
-                        grid[piece.y][piece.x] = piece.center;
-                        grid[piece.y][piece.x-1] = piece.center;
-                        grid[piece.y-1][piece.x+1] = piece.center;
-                        grid[piece.y-1][piece.x] = piece.center;
-                        return 1;
+                    if(piece.y == 24 || (piece.y < 24 && (grid[piece.y+1][piece.x].value == '#' || grid[piece.y+1][piece.x-1].value == '#' || grid[piece.y][piece.x+1].value == '#'))){
+                        if(piece.center.c != grey_50){
+                            counter++;
+                            *velocity = 0;
+                            if(counter == fmin(cooldown - 10*(level-1), 60)  || hard_drop == 1){
+                                if(piece.y <= 5){
+                                strcpy(state, "over");
+                                return 1;
+                                }
+                                grid[piece.y][piece.x] = piece.center;
+                                grid[piece.y][piece.x-1] = piece.center;
+                                grid[piece.y-1][piece.x+1] = piece.center;
+                                grid[piece.y-1][piece.x] = piece.center;
+                                counter = 0;
+                                return 1;
+                            }
+                        }
+                        else{
+                            if(piece.center.c == grey_50){
+                                return 1;
+                            }
+                            else{
+                                *velocity = 0;
+                                return 0;
+                            }
+                        }
                     }
                     break;
                 case 1:
-                    if(piece.y == 19 || grid[piece.y+1][piece.x].value == '#')
-                    {
-                        grid[piece.y][piece.x] = piece.center;
-                        grid[piece.y][piece.x] = piece.center;
-                        grid[piece.y][piece.x] = piece.center;
-                        grid[piece.y][piece.x] = piece.center;
-                        return 1;
+                    if(piece.y == 24 || (piece.y < 24 && (grid[piece.y+1][piece.x].value == '#' || grid[piece.y][piece.x-1].value == '#'))){
+                        if(piece.center.c != grey_50){
+                            counter++;
+                            *velocity = 0;
+                            if(counter == fmin(cooldown - 10*(level-1), 60)  || hard_drop == 1){
+                                if(piece.y <= 6){
+                                strcpy(state, "over");
+                                return 1;
+                                }
+                                grid[piece.y][piece.x] = piece.center;
+                                grid[piece.y-1][piece.x] = piece.center;
+                                grid[piece.y-1][piece.x-1] = piece.center;
+                                grid[piece.y-2][piece.x-1] = piece.center;
+                                counter = 0;
+                                return 1;
+                            }
+                        }
+                        else{
+                            if(piece.center.c == grey_50){
+                                return 1;
+                            }
+                            else{
+                                *velocity = 0;
+                                return 0;
+                            }
+                        }
                     }
                     break;
                 case 2:
-                    if(piece.y == 19 || grid[piece.y+1][piece.x].value == '#')
-                    {
-                        grid[piece.y][piece.x] = piece.center;
-                        grid[piece.y][piece.x] = piece.center;
-                        grid[piece.y][piece.x] = piece.center;
-                        grid[piece.y][piece.x] = piece.center;
-                        return 1;
+                    if(piece.y == 24 || (piece.y < 24 && (grid[piece.y+1][piece.x].value == '#' || grid[piece.y+1][piece.x-1].value == '#' || grid[piece.y][piece.x+1].value == '#'))){
+                        if(piece.center.c != grey_50){
+                            counter++;
+                            *velocity = 0;
+                            if(counter == fmin(cooldown - 10*(level-1), 60)  || hard_drop == 1){
+                                if(piece.y <= 5){
+                                strcpy(state, "over");
+                                return 1;
+                                }
+                                grid[piece.y][piece.x] = piece.center;
+                                grid[piece.y][piece.x-1] = piece.center;
+                                grid[piece.y-1][piece.x+1] = piece.center;
+                                grid[piece.y-1][piece.x] = piece.center;
+                                counter = 0;
+                                return 1;
+                            }
+                        }
+                        else{
+                            if(piece.center.c == grey_50){
+                                return 1;
+                            }
+                            else{
+                                *velocity = 0;
+                                return 0;
+                            }
+                        }
                     }
                     break;
                 case 3:
-                    if(piece.y == 19 || grid[piece.y+1][piece.x].value == '#')
-                    {
-                        grid[piece.y][piece.x] = piece.center;
-                        grid[piece.y][piece.x] = piece.center;
-                        grid[piece.y][piece.x] = piece.center;
-                        grid[piece.y][piece.x] = piece.center;
-                        return 1;
+                    if(piece.y == 24 || (piece.y < 24 && (grid[piece.y+1][piece.x].value == '#' || grid[piece.y][piece.x-1].value == '#'))){
+                        if(piece.center.c != grey_50){
+                            counter++;
+                            *velocity = 0;
+                            if(counter == fmin(cooldown - 10*(level-1), 60)  || hard_drop == 1){
+                                if(piece.y <= 6){
+                                strcpy(state, "over");
+                                return 1;
+                                }
+                                grid[piece.y][piece.x] = piece.center;
+                                grid[piece.y-1][piece.x] = piece.center;
+                                grid[piece.y-1][piece.x-1] = piece.center;
+                                grid[piece.y-2][piece.x-1] = piece.center;
+                                counter = 0;
+                                return 1;
+                            }
+                        }
+                        else{
+                            if(piece.center.c == grey_50){
+                                return 1;
+                            }
+                            else{
+                                *velocity = 0;
+                                return 0;
+                            }
+                        }
                     }
                     break;
             }
@@ -737,94 +1536,449 @@ bool checkcollision(Cell grid[20][10], Piece piece, int counter)
             switch(piece.rotation)
             {
                 case 0:
-                    if(piece.y == 19 || grid[piece.y+1][piece.x].value == '#' || grid[piece.y+1][piece.x-1].value == '#' || grid[piece.y+1][piece.x+1].value == '#')
-                    {
-                        grid[piece.y][piece.x] = piece.center;
-                        grid[piece.y][piece.x-1] = piece.center;
-                        grid[piece.y][piece.x+1] = piece.center;
-                        grid[piece.y-1][piece.x] = piece.center;
-                        return 1;
+                    if(piece.y == 24 || (piece.y < 24 && (grid[piece.y+1][piece.x].value == '#' || grid[piece.y+1][piece.x-1].value == '#' || grid[piece.y+1][piece.x+1].value == '#'))){
+                        if(piece.center.c != grey_50){
+                            counter++;
+                            *velocity = 0;
+                            if(counter == fmin(cooldown - 10*(level-1), 60)  || hard_drop == 1){
+                                if(piece.y <= 5){
+                                strcpy(state, "over");
+                                return 1;
+                                }
+                                grid[piece.y][piece.x] = piece.center;
+                                grid[piece.y][piece.x-1] = piece.center;
+                                grid[piece.y][piece.x+1] = piece.center;
+                                grid[piece.y-1][piece.x] = piece.center;
+                                counter = 0;
+                                return 1;
+                            }
+                        }
+                        else{
+                            if(piece.center.c == grey_50){
+                                return 1;
+                            }
+                            else{
+                                *velocity = 0;
+                                return 0;
+                            }
+                        }
                     }
                     break;
                 case 1:
-                    if(piece.y == 19 || grid[piece.y+1][piece.x].value == '#' || grid[piece.y-1][piece.x+1].value == '#')
-                    {
-                        grid[piece.y][piece.x] = piece.center;
-                        grid[piece.y-1][piece.x] = piece.center;
-                        grid[piece.y-1][piece.x+1] = piece.center;
-                        grid[piece.y-2][piece.x] = piece.center;
-                        return 1;
+                    if(piece.y == 24 || (piece.y < 24 && (grid[piece.y+1][piece.x].value == '#' || grid[piece.y][piece.x+1].value == '#'))){
+                        if(piece.center.c != grey_50){
+                            counter++;
+                            *velocity = 0;
+                            if(counter == fmin(cooldown - 10*(level-1), 60)  || hard_drop == 1){
+                                if(piece.y <= 6){
+                                strcpy(state, "over");
+                                return 1;
+                                }
+                                grid[piece.y][piece.x] = piece.center;
+                                grid[piece.y-1][piece.x] = piece.center;
+                                grid[piece.y-1][piece.x+1] = piece.center;
+                                grid[piece.y-2][piece.x] = piece.center;
+                                counter = 0;
+                                return 1;
+                            }
+                        }
+                        else{
+                            if(piece.center.c == grey_50){
+                                return 1;
+                            }
+                            else{
+                                *velocity = 0;
+                                return 0;
+                            }
+                        }
                     }
                     break;
                 case 2:
-                    if(piece.y == 19 || grid[piece.y+1][piece.x].value == '#' || grid[piece.y][piece.x-1].value == '#' || grid[piece.y][piece.x+1].value == '#')
-                    {
-                        grid[piece.y][piece.x] = piece.center;
-                        grid[piece.y-1][piece.x-1] = piece.center;
-                        grid[piece.y-1][piece.x+1] = piece.center;
-                        grid[piece.y-1][piece.x] = piece.center;
-                        return 1;
+                    if(piece.y == 24 || (piece.y < 24 && (grid[piece.y+1][piece.x].value == '#' || grid[piece.y][piece.x-1].value == '#' || grid[piece.y][piece.x+1].value == '#'))){
+                        if(piece.center.c != grey_50){
+                            counter++;
+                            *velocity = 0;
+                            if(counter == fmin(cooldown - 10*(level-1), 60)  || hard_drop == 1){
+                                if(piece.y <= 5){
+                                strcpy(state, "over");
+                                return 1;
+                                }
+                                grid[piece.y][piece.x] = piece.center;
+                                grid[piece.y-1][piece.x-1] = piece.center;
+                                grid[piece.y-1][piece.x+1] = piece.center;
+                                grid[piece.y-1][piece.x] = piece.center;
+                                counter = 0;
+                                return 1;
+                            }
+                        }
+                        else{
+                            if(piece.center.c == grey_50){
+                                return 1;
+                            }
+                            else{
+                                *velocity = 0;
+                                return 0;
+                            }
+                        }
                     }
                     break;
                 case 3:
-                    if(piece.y == 19 || grid[piece.y+1][piece.x].value == '#' || grid[piece.y-1][piece.x-1].value == '#')
-                    {
-                        grid[piece.y][piece.x] = piece.center;
-                        grid[piece.y-1][piece.x] = piece.center;
-                        grid[piece.y-1][piece.x-1] = piece.center;
-                        grid[piece.y-2][piece.x] = piece.center;
-                        return 1;
+                    if(piece.y == 24 || (piece.y < 24 && (grid[piece.y+1][piece.x].value == '#' || grid[piece.y-1][piece.x-1].value == '#'))){
+                        if(piece.center.c != grey_50){
+                            counter++;
+                            *velocity = 0;
+                            if(counter == fmin(cooldown - 10*(level-1), 60)  || hard_drop == 1){
+                                if(piece.y <= 6){
+                                strcpy(state, "over");
+                                return 1;
+                                }
+                                grid[piece.y][piece.x] = piece.center;
+                                grid[piece.y-1][piece.x] = piece.center;
+                                grid[piece.y-1][piece.x-1] = piece.center;
+                                grid[piece.y-2][piece.x] = piece.center;
+                                counter = 0;
+                                return 1;
+                            }
+                        }
+                        else{
+                            if(piece.center.c == grey_50){
+                                return 1;
+                            }
+                            else{
+                                *velocity = 0;
+                                return 0;
+                            }
+                        }
                     }
                     break;
             }
             break;
         case 'Z':
-            switch(piece.rotation)
-            {
+            switch(piece.rotation){
                 case 0:
-                    if(piece.y == 19 || grid[piece.y+1][piece.x].value == '#' || grid[piece.y+1][piece.x+1].value == '#' || grid[piece.y][piece.x-1].value == '#')
-                    {
-                        grid[piece.y][piece.x] = piece.center;
-                        grid[piece.y-1][piece.x-1] = piece.center;
-                        grid[piece.y][piece.x+1] = piece.center;
-                        grid[piece.y-1][piece.x] = piece.center;
-                        return 1;
+                    if(piece.y == 24 || (piece.y < 24 && (grid[piece.y+1][piece.x].value == '#' || grid[piece.y+1][piece.x+1].value == '#' || grid[piece.y][piece.x-1].value == '#'))){
+                        if(piece.center.c != grey_50){
+                            counter++;
+                            *velocity = 0;
+                            if(counter == fmin(cooldown - 10*(level-1), 60)  || hard_drop == 1){
+                                if(piece.y <= 5){
+                                strcpy(state, "over");
+                                return 1;
+                                }
+                                grid[piece.y][piece.x] = piece.center;
+                                grid[piece.y-1][piece.x-1] = piece.center;
+                                grid[piece.y][piece.x+1] = piece.center;
+                                grid[piece.y-1][piece.x] = piece.center;
+                                counter = 0;
+                                return 1;
+                            }
+                        }
+                        else{
+                            if(piece.center.c == grey_50){
+                                return 1;
+                            }
+                            else{
+                                *velocity = 0;
+                                return 0;
+                            }
+                        }
                     }
                     break;
                 case 1:
-                    if(piece.y == 19 || grid[piece.y+1][piece.x].value == '#')
-                    {
-                        grid[piece.y][piece.x] = piece.center;
-                        grid[piece.y][piece.x] = piece.center;
-                        grid[piece.y][piece.x] = piece.center;
-                        grid[piece.y][piece.x] = piece.center;
-                        return 1;
+                    if(piece.y == 24 || (piece.y < 24 && (grid[piece.y+1][piece.x].value == '#' || grid[piece.y][piece.x+1].value == '#'))){
+                        if(piece.center.c != grey_50){
+                            counter++;
+                            *velocity = 0;
+                            if(counter == fmin(cooldown - 10*(level-1), 60)  || hard_drop == 1){
+                                if(piece.y <= 6){
+                                strcpy(state, "over");
+                                return 1;
+                                }
+                                grid[piece.y][piece.x] = piece.center;
+                                grid[piece.y-1][piece.x] = piece.center;
+                                grid[piece.y-1][piece.x+1] = piece.center;
+                                grid[piece.y-2][piece.x+1] = piece.center;
+                                counter = 0;
+                                return 1;
+                            }
+                        }
+                        else{
+                            if(piece.center.c == grey_50){
+                                return 1;
+                            }
+                            else{
+                                *velocity = 0;
+                                return 0;
+                            }
+                        }
                     }
                     break;
                 case 2:
-                    if(piece.y == 19 || grid[piece.y+1][piece.x].value == '#')
-                    {
-                        grid[piece.y][piece.x] = piece.center;
-                        grid[piece.y][piece.x] = piece.center;
-                        grid[piece.y][piece.x] = piece.center;
-                        grid[piece.y][piece.x] = piece.center;
-                        return 1;
+                    if(piece.y == 24 || (piece.y < 24 && (grid[piece.y+1][piece.x].value == '#' || grid[piece.y+1][piece.x+1].value == '#' || grid[piece.y][piece.x-1].value == '#'))){
+                        if(piece.center.c != grey_50){
+                            counter++;
+                            *velocity = 0;
+                            if(counter == fmin(cooldown - 10*(level-1), 60)  || hard_drop == 1){
+                                if(piece.y <= 5){
+                                strcpy(state, "over");
+                                return 1;
+                                }
+                                grid[piece.y][piece.x] = piece.center;
+                                grid[piece.y-1][piece.x-1] = piece.center;
+                                grid[piece.y][piece.x+1] = piece.center;
+                                grid[piece.y-1][piece.x] = piece.center;
+                                counter = 0;
+                                return 1;
+                            }
+                            
+                        }
+                        else{
+                            if(piece.center.c == grey_50){
+                                return 1;
+                            }
+                            else{
+                                *velocity = 0;
+                                return 0;
+                            }
+                        }
                     }
                     break;
                 case 3:
-                    if(piece.y == 19 || grid[piece.y+1][piece.x].value == '#')
-                    {
-                        grid[piece.y][piece.x] = piece.center;
-                        grid[piece.y][piece.x] = piece.center;
-                        grid[piece.y][piece.x] = piece.center;
-                        grid[piece.y][piece.x] = piece.center;
-                        return 1;
+                    if(piece.y == 24 || (piece.y < 24 && (grid[piece.y+1][piece.x].value == '#' || grid[piece.y][piece.x+1].value == '#'))){
+                        if(piece.center.c != grey_50){
+                            counter++;
+                            *velocity = 0;
+                            if(counter == fmin(cooldown - 10*(level-1), 60)  || hard_drop == 1){
+                                if(piece.y <= 6){
+                                strcpy(state, "over");
+                                return 1;
+                                }
+                                grid[piece.y][piece.x] = piece.center;
+                                grid[piece.y-1][piece.x] = piece.center;
+                                grid[piece.y-1][piece.x+1] = piece.center;
+                                grid[piece.y-2][piece.x+1] = piece.center;
+                                counter = 0;
+                                return 1;
+                            }
+                            
+                        }
+                        else{
+                            if(piece.center.c == grey_50){
+                                return 1;
+                            }
+                            else{
+                                *velocity = 0;
+                                return 0;
+                            }
+                        }
                     }
                     break;
             }
             break;
     }
     return 0;
+}
+
+bool valid_rotation(Cell grid[25][10], Piece piece)
+{
+    switch(piece.type){
+        case 'I':
+            switch(piece.rotation){
+                case 0:
+                    if(grid[piece.y][piece.x-1].value == '#' || grid[piece.y][piece.x-2].value == '#' || grid[piece.y][piece.x-3].value == '#' || piece.x < 3){
+                        return 0;
+                    }
+                    return 1;
+                    break;
+                case 1:
+                    if(grid[piece.y-1][piece.x].value == '#' || grid[piece.y-2][piece.x].value == '#' || grid[piece.y-3][piece.x].value == '#'){
+                        return 0;
+                    }
+                    return 1;
+                    break;
+                case 2:
+                    if(grid[piece.y][piece.x-1].value == '#' || grid[piece.y][piece.x-2].value == '#' || grid[piece.y][piece.x-3].value == '#' || piece.x < 3){
+                        return 0;
+                    }
+                    return 1;
+                    break;
+                case 3:
+                if(grid[piece.y-1][piece.x].value == '#' || grid[piece.y-2][piece.x].value == '#' || grid[piece.y-3][piece.x].value == '#'){
+                        return 0;
+                    }
+                    return 1;
+                    break;
+            }
+            break;
+        case 'J':
+            switch(piece.rotation){
+                case 0:
+                    if(grid[piece.y-1][piece.x].value == '#' || grid[piece.y-2][piece.x].value == '#' || grid[piece.y-2][piece.x+1].value == '#'){
+                        return 0;
+                    }
+                    return 1;
+                    break;
+                case 1:
+                    if(grid[piece.y-1][piece.x-1].value == '#' || grid[piece.y-1][piece.x-2].value == '#' || piece.x < 2){
+                        return 0;
+                    }
+                    return 1;
+                    break;
+                case 2:
+                    if(grid[piece.y][piece.x-1].value == '#' || grid[piece.y-2][piece.x].value == '#'){
+                        return 0;
+                    }
+                    return 1;
+                    break;
+                case 3:
+                if(grid[piece.y][piece.x+1].value == '#' || grid[piece.y-1][piece.x-1].value == '#' || grid[piece.y][piece.x-1].value == '#' || piece.x > 8){
+                        return 0;
+                    }
+                    return 1;
+                    break;
+            }
+            break;
+        case 'L':
+            switch(piece.rotation){
+                case 0:
+                    if(grid[piece.y-1][piece.x].value == '#' || grid[piece.y-2][piece.x].value == '#'){
+                        return 0;
+                    }
+                    return 1;
+                    break;
+                case 1:
+                    if(grid[piece.y-1][piece.x+1].value == '#' || grid[piece.y-1][piece.x+2].value == '#' || piece.x > 7){
+                        return 0;
+                    }
+                    return 1;
+                    break;
+                case 2:
+                    if(grid[piece.y-2][piece.x].value == '#' || grid[piece.y-2][piece.x-1].value == '#' || piece.x < 1){
+                        return 0;
+                    }
+                    return 1;
+                    break;
+                case 3:
+                    if(grid[piece.y-1][piece.x+1].value == '#' || grid[piece.y][piece.x-1].value == '#' ||  grid[piece.y][piece.x+1].value == '#'){
+                        return 0;
+                    }
+                    return 1;
+                    break;
+            }
+            break;
+        case 'O':
+            return 1;
+            break;
+        case 'S':
+            switch(piece.rotation){
+                case 0:
+                    if(grid[piece.y-1][piece.x-1].value == '#' || grid[piece.y-2][piece.x-1].value == '#'){
+                        return 0;
+                    }
+                    return 1;
+                    break;
+                case 1:
+                    if(grid[piece.y][piece.x-1].value == '#' || grid[piece.y-1][piece.x+1].value == '#' || piece.x > 8){
+                        return 0;
+                    }
+                    return 1;
+                    break;
+                case 2:
+                    if(grid[piece.y-1][piece.x-1].value == '#' || grid[piece.y-2][piece.x-1].value == '#'){
+                        return 0;
+                    }
+                    return 1;
+                    break;
+                case 3:
+                    if(grid[piece.y][piece.x-1].value == '#' || grid[piece.y-1][piece.x+1].value == '#' || piece.x > 8){
+                        return 0;
+                    }
+                    return 1;
+                    break;
+            }
+            break;
+        case 'T':
+            switch(piece.rotation){
+                case 0:
+                    if(grid[piece.y-1][piece.x+1].value == '#' || grid[piece.y-2][piece.x].value == '#'){
+                        return 0;
+                    }
+                    return 1;
+                    break;
+                case 1:
+                    if(grid[piece.y-1][piece.x-1].value == '#' || piece.x < 1){
+                        return 0;
+                    }
+                    return 1;
+                    break;
+                case 2:
+                    if(grid[piece.y-2][piece.x].value == '#'){
+                        return 0;
+                    }
+                    return 1;
+                    break;
+                case 3:
+                    if(grid[piece.y][piece.x-1].value == '#' || grid[piece.y][piece.x+1].value == '#' || piece.x > 8){
+                        return 0;
+                    }
+                    return 1;
+                    break;
+            }
+            break;
+        case 'Z':
+            switch(piece.rotation){
+                case 0:
+                    if(grid[piece.y-1][piece.x+1].value == '#' || grid[piece.y-2][piece.x+1].value == '#'){
+                        return 0;
+                    }
+                    return 1;
+                    break;
+                case 1:
+                    if(grid[piece.y][piece.x+1].value == '#' || grid[piece.y-1][piece.x-1].value == '#' || piece.x < 1){
+                        return 0;
+                    }
+                    return 1;
+                    break;
+                case 2:
+                    if(grid[piece.y-1][piece.x+1].value == '#' || grid[piece.y-2][piece.x+1].value == '#'){
+                            return 0;
+                        }
+                    return 1;
+                    break;
+                case 3:
+                    if(grid[piece.y][piece.x+1].value == '#' || grid[piece.y-1][piece.x-1].value == '#' || piece.x < 1){
+                        return 0;
+                    }
+                    return 1;
+                    break;
+            }
+            break;
+    }
+}
+
+bool full_row(Cell grid[25][10], int i)
+{
+    for(int j = 0; j < 10; j++){
+        if(grid[i][j].value != '#'){
+            return 0;
+        }
+    }
+    return 1;  
+}
+
+void clear_row(Cell grid[25][10], int k)
+{
+    if(k == 0)
+    {
+        for(int j = 0; j < 10; j++){
+            grid[k][j].value = '0';
+            grid[k][j].c = white_256;
+        }
+    }
+    else
+        for(int i = k; i > 0; i--)
+            for(int j = 0; j < 10; j++)
+                grid[i][j] = grid[i-1][j];
 }
 
 void clear_screen()
@@ -845,6 +1999,15 @@ void show_cursor()
 void hide_cursor()
 {
     printf("\033[?25l");
+}
+
+void init(Cell grid[25][10])
+{
+    enableRawMode();
+    srand(time(0));
+    emptygrid(grid);
+    hide_cursor();
+    clear_screen();
 }
 
 void quit()
