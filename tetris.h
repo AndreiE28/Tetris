@@ -3,8 +3,11 @@
 #include <math.h>
 #include <stdbool.h>
 #include <string.h>
+#include <signal.h>
 #include "dyeterm.h"
 #include "livein.h"
+#define MINIAUDIO_IMPLEMENTATION
+#include "miniaudio.h"
 
 typedef struct cell{
     Color_256 c;
@@ -17,6 +20,9 @@ typedef struct piece{
     char type;
     int rotation;
 }Piece;
+
+ma_engine audio_engine;
+ma_sound bg_music;
 
 char input_handler() 
 {
@@ -2010,12 +2016,34 @@ void init(Cell grid[25][10])
     clear_screen();
 }
 
-void quit()
+void start_bg_music()
 {
+    if (ma_engine_init(NULL, &audio_engine) != MA_SUCCESS) {
+        fprintf(stderr, "Warning: Could not initialize audio engine.\n");
+    } else {
+        ma_sound_init_from_file(&audio_engine, "tetris_theme.wav", MA_SOUND_FLAG_STREAM, NULL, NULL, &bg_music);
+        ma_sound_set_looping(&bg_music, MA_TRUE);
+        ma_sound_set_volume(&bg_music, 0.4f); 
+        ma_sound_start(&bg_music);
+    }
+}
+
+void stop_music(){
+    ma_sound_stop(&bg_music);
+}
+
+void quit(int signal_nr)
+{
+    stop_music();
     disableRawMode();
     clear_screen();
     reset_cursor();
     show_cursor();
     setcolor(reset);
-    exit(1);
+    exit(signal_nr);
+}
+
+void clean_exit()
+{
+    quit(1);
 }

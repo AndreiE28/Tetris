@@ -27,7 +27,7 @@ void menu(char state[5])
             return;
         }
         if(in == 'q'){
-            quit();
+            clean_exit();
         }
         usleep(16666);
     }
@@ -35,7 +35,7 @@ void menu(char state[5])
 
 void game(Cell grid[25][10], char state[5])
 {
-    Piece piece, ghost_piece, next_piece;
+    Piece piece, ghost_piece, next_piece, test_piece;
     Color_256 bg = grey_23;
     int bag[7] = {0}, current_piece = 0, full_rows = 0, level = 1;
     double y,velocity, score = 0;
@@ -49,6 +49,7 @@ void game(Cell grid[25][10], char state[5])
     current_piece++;
     piece.x = 5;
     piece.y = 0;
+    test_piece = piece;
     while(1){
         if(strcmp(state, "over") == 0){
             clear_screen();
@@ -69,13 +70,14 @@ void game(Cell grid[25][10], char state[5])
         ghost_piece.rotation = piece.rotation;
         ghost_piece.x = piece.x;
         ghost_piece.y = piece.y;
+        test_piece = piece;
         while(!checkcollision(grid, ghost_piece, &velocity, hard_drop, level, state)){
             ghost_piece.y++;
         }
         level = score/1000 + 1;
         in = input_handler();
         if(in == 'q'){
-            quit();
+            clean_exit();
         }
         if(in == 'a'){
             switch(piece.type){
@@ -349,9 +351,143 @@ void game(Cell grid[25][10], char state[5])
             ghost_piece.y = piece.y;
         }
             
-        if(in == 'w' && valid_rotation(grid, piece)){
-            piece.rotation = (piece.rotation + 1) % 4;
-            ghost_piece.y = 0;
+        if(in == 'w'){
+            if(valid_rotation(grid, piece)){
+                piece.rotation = (piece.rotation + 1) % 4;
+                ghost_piece.y = 0;
+            }
+            else{
+                switch(piece.rotation){
+                    case 0:
+                        test_piece.x -= 2;
+                        if(valid_rotation(grid, test_piece)){
+                            piece = test_piece;
+                            piece.rotation = (piece.rotation + 1) % 4;
+                            ghost_piece.y = 0;
+                            break;
+                        }
+                        test_piece.x += 3;
+                        if(valid_rotation(grid, test_piece)){
+                            piece = test_piece;
+                            piece.rotation = (piece.rotation + 1) % 4;
+                            ghost_piece.y = 0;
+                            break;
+                        }
+                        test_piece.x -= 3;
+                        test_piece.y -= 1;
+                        if(valid_rotation(grid, test_piece)){
+                            piece = test_piece;
+                            piece.rotation = (piece.rotation + 1) % 4;
+                            ghost_piece.y = 0;
+                            break;
+                        }
+                        test_piece.x += 3;
+                        test_piece.y += 3;
+                        if(valid_rotation(grid, test_piece)){
+                            piece = test_piece;
+                            piece.rotation = (piece.rotation + 1) % 4;
+                            ghost_piece.y = 0;
+                            break;
+                        }
+                        break;
+                    case 1:
+                        test_piece.x -= 1;
+                        if(valid_rotation(grid, test_piece)){
+                            piece = test_piece;
+                            piece.rotation = (piece.rotation + 1) % 4;
+                            ghost_piece.y = 0;
+                            break;
+                        }
+                        test_piece.x += 3;
+                        if(valid_rotation(grid, test_piece)){
+                            piece = test_piece;
+                            piece.rotation = (piece.rotation + 1) % 4;
+                            ghost_piece.y = 0;
+                            break;
+                        }
+                        test_piece.x -= 3;
+                        test_piece.y += 2;
+                        if(valid_rotation(grid, test_piece)){
+                            piece = test_piece;
+                            piece.rotation = (piece.rotation + 1) % 4;
+                            ghost_piece.y = 0;
+                            break;
+                        }
+                        test_piece.x += 3;
+                        test_piece.y -= 3;
+                        if(valid_rotation(grid, test_piece)){
+                            piece = test_piece;
+                            piece.rotation = (piece.rotation + 1) % 4;
+                            ghost_piece.y = 0;
+                            break;
+                        }
+                        break;
+                    case 2:
+                        test_piece.x += 2;
+                        if(valid_rotation(grid, test_piece)){
+                            piece = test_piece;
+                            piece.rotation = (piece.rotation + 1) % 4;
+                            ghost_piece.y = 0;
+                            break;
+                        }
+                        test_piece.x -= 3;
+                        if(valid_rotation(grid, test_piece)){
+                            piece = test_piece;
+                            piece.rotation = (piece.rotation + 1) % 4;
+                            ghost_piece.y = 0;
+                            break;
+                        }
+                        test_piece.x += 3;
+                        test_piece.y += 1;
+                        if(valid_rotation(grid, test_piece)){
+                            piece = test_piece;
+                            piece.rotation = (piece.rotation + 1) % 4;
+                            ghost_piece.y = 0;
+                            break;
+                        }
+                        test_piece.x -= 3;
+                        test_piece.y -= 3;
+                        if(valid_rotation(grid, test_piece)){
+                            piece = test_piece;
+                            piece.rotation = (piece.rotation + 1) % 4;
+                            ghost_piece.y = 0;
+                            break;
+                        }
+                        break;
+                    case 3:
+                        test_piece.x += 1;
+                        if(valid_rotation(grid, test_piece)){
+                            piece = test_piece;
+                            piece.rotation = (piece.rotation + 1) % 4;
+                            ghost_piece.y = 0;
+                            break;
+                        }
+                        test_piece.x -= 3;
+                        if(valid_rotation(grid, test_piece)){
+                            piece = test_piece;
+                            piece.rotation = (piece.rotation + 1) % 4;
+                            ghost_piece.y = 0;
+                            break;
+                        }
+                        test_piece.x += 3;
+                        test_piece.y -= 2;
+                        if(valid_rotation(grid, test_piece)){
+                            piece = test_piece;
+                            piece.rotation = (piece.rotation + 1) % 4;
+                            ghost_piece.y = 0;
+                            break;
+                        }
+                        test_piece.x -= 3;
+                        test_piece.y += 3;
+                        if(valid_rotation(grid, test_piece)){
+                            piece = test_piece;
+                            piece.rotation = (piece.rotation + 1) % 4;
+                            ghost_piece.y = 0;
+                            break;
+                        }
+                        break;
+                }
+            }
         }
             
         if (in == ' '){
@@ -426,7 +562,7 @@ void game_over(char state[5], Cell grid[25][10])
             return;
         }
         if(in == 'q'){
-            quit();
+            clean_exit();
         }
         usleep(16666);
     }
@@ -434,9 +570,13 @@ void game_over(char state[5], Cell grid[25][10])
 
 int main()
 {
+    start_bg_music();
     Cell grid[25][10];
     init(grid);
     char state[5] = "menu";
+    signal(SIGINT,  quit);
+    signal(SIGSEGV, quit);
+    signal(SIGFPE,  quit);
     while(1){
         if(strcmp(state, "menu") == 0){
             menu(state);
@@ -448,6 +588,6 @@ int main()
             game_over(state, grid);
         }
     }
-    atexit(quit);
+    atexit(clean_exit);
     return 0;
 }
