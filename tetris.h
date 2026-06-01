@@ -954,10 +954,11 @@ bool findnxtpiece(Cell grid[4][3], int i, int j, Piece piece, Color_256 bg)
     return 0;
 }
 
-void printgrid(Cell grid[25][10], Piece piece, Piece ghost_piece, Piece next_piece, int score, int level, Color_256 bg, int offset)
+void printgrid(Cell grid[25][10], Piece piece, Piece ghost_piece, Piece next_piece, Piece held_piece, int score, int level, Color_256 bg, int offset)
 {
     bool ok = 1, nxt = 1;
     Cell nxt_box[4][3];
+    Cell hld_box[4][3];
     for(int k = 0; k <= 4; k++)
     {
         printf("\n");
@@ -995,15 +996,28 @@ void printgrid(Cell grid[25][10], Piece piece, Piece ghost_piece, Piece next_pie
             for(int l = 0; l < 3; l++){
                 nxt = !findnxtpiece(nxt_box, i-8, l, next_piece, bg);
                 if(nxt){
-                    if(l != 3){
-                        color_on_bg_256(white_256, bg);
-                        printf("0 ");
-                    }
-                    else{
-                        color_on_bg_256(white_256, bg);
-                        printf("0");
-                    }
-                    
+                    color_on_bg_256(white_256, bg);
+                    printf("0 ");
+                }
+            }
+        }
+        if(i == 15){
+            setcolor(reset);
+            printf("\t\t\tHELD PIECE:");
+        }
+        if(i >= 16 && i < 20){
+            setcolor(reset);
+            printf("\t\t\t  ");
+            for(int l = 0; l < 3; l++){
+                if(held_piece.type != '\0'){
+                    nxt = !findnxtpiece(hld_box, i-16, l, held_piece, bg);
+                }
+                else{
+                    nxt = 1;
+                }
+                if(nxt){
+                    color_on_bg_256(white_256, bg);
+                    printf("0 ");
                 }
             }
         }
